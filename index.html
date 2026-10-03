@@ -727,7 +727,7 @@
     renderUnfiled(unfiled);
     recount();
     document.querySelectorAll('#pipe textarea, #pipe input, #lockSel, input, textarea').forEach(function (x) { x.readOnly = true; });
-    document.querySelectorAll('select').forEach(function (x) { x.disabled = true; });
+    document.querySelectorAll('select').forEach(function (x) { x.style.pointerEvents = 'none'; x.tabIndex = -1; x.style.opacity = '1'; });
   }
 
   // ── Live load / save ─────────────────────────────────────────────────────
