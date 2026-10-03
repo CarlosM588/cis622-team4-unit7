@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Team 4 Unit 7 Dashboard</title>
+</head>
+<body>
+<style>
+  :root {
+    --bg: #e9edf4;
+    --surface: #ffffff;
+    --surface-2: #f4f6fb;
+    --ink: #151c2c;
+    --ink-2: #45506a;
+    --muted: #8892a6;
+    --border: #dde3ee;
+    --border-strong: #c9d2e0;
+    --accent: #cf821f;
+    --accent-soft: #f6e6cf;
+    --accent-ink: #764411;
+    --done: #2c9268;
+    --active: #3a76c8;
+    --todo: #8892a6;
+    --over: #cf4257;
+    --shadow: 0 1px 2px rgba(20,28,46,.06), 0 8px 24px rgba(20,28,46,.06);
+    --shadow-lift: 0 2px 6px rgba(20,28,46,.10), 0 18px 40px rgba(20,28,46,.12);
+    --r: 14px;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1220; --surface: #151d2d; --surface-2: #1b2536;
+      --ink: #eaf0f8; --ink-2: #aeb9cd; --muted: #6d7a91;
+      --border: #283246; --border-strong: #38455d;
+      --accent: #e19a3c; --accent-soft: #3a2c14; --accent-ink: #f0c98a;
+      --done: #37a878; --active: #5590dd; --todo: #74809a; --over: #e05a70;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+      --shadow-lift: 0 2px 8px rgba(0,0,0,.4), 0 22px 46px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #e9edf4; --surface: #ffffff; --surface-2: #f4f6fb;
+    --ink: #151c2c; --ink-2: #45506a; --muted: #8892a6;
+    --border: #dde3ee; --border-strong: #c9d2e0;
+    --accent: #cf821f; --accent-soft: #f6e6cf; --accent-ink: #764411;
+    --done: #2c9268; --active: #3a76c8; --todo: #8892a6; --over: #cf4257;
+    --shadow: 0 1px 2px rgba(20,28,46,.06), 0 8px 24px rgba(20,28,46,.06);
+    --shadow-lift: 0 2px 6px rgba(20,28,46,.10), 0 18px 40px rgba(20,28,46,.12);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1220; --surface: #151d2d; --surface-2: #1b2536;
+    --ink: #eaf0f8; --ink-2: #aeb9cd; --muted: #6d7a91;
+    --border: #283246; --border-strong: #38455d;
+    --accent: #e19a3c; --accent-soft: #3a2c14; --accent-ink: #f0c98a;
+    --done: #37a878; --active: #5590dd; --todo: #74809a; --over: #e05a70;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+    --shadow-lift: 0 2px 8px rgba(0,0,0,.4), 0 22px 46px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); }
+  .board {
+    background: var(--bg); color: var(--ink); font-family: var(--sans);
+    line-height: 1.5; min-height: 100vh; padding: 22px 20px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .board .shell { max-width: 1080px; margin: 0 auto; }
+
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .cmd {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .cmd .brand { display: flex; flex-direction: column; gap: 3px; margin-right: auto; }
+  .cmd h1 { margin: 0; font-size: 21px; font-weight: 750; letter-spacing: -.02em; color: var(--ink); text-wrap: balance; }
+  .cmd .brand .sub { font-size: 12.5px; color: var(--ink-2); }
+  .brandmark { display: inline-flex; align-items: center; gap: 8px; }
+  .brandmark .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+
+  .avatars { display: flex; align-items: center; }
+  .avatars .av { margin-left: -8px; }
+  .av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 12.5px; font-weight: 700; color: #fff; border: 2px solid var(--surface); font-variant-numeric: tabular-nums; }
+  .av.a1 { background: #4b73b8; } .av.a2 { background: #b8654b; } .av.a3 { background: #4b9c86; } .av.a4 { background: #8a5bb0; }
+  .av.tbd { background: var(--surface-2); color: var(--muted); border: 2px dashed var(--border-strong); }
+  .av.pair { background: linear-gradient(135deg, #8a5bb0 50%, #4b9c86 50%); letter-spacing: -.5px; }
+
+  .countdown { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; padding-left: 16px; border-left: 1px solid var(--border); }
+  .countdown .big { font-size: 24px; font-weight: 750; color: var(--accent); letter-spacing: -.02em; }
+  .countdown .lbl { font-size: 11px; color: var(--muted); }
+
+  .theme-btn { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border);
+    border-radius: 9px; width: 36px; height: 36px; cursor: pointer; display: grid; place-items: center; font-size: 15px;
+    transition: background .15s, border-color .15s; }
+  .theme-btn:hover { border-color: var(--border-strong); }
+  .theme-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .banner { display: flex; align-items: flex-start; gap: 11px; margin-top: 14px;
+    background: var(--accent-soft); border: 1px solid transparent; border-radius: var(--r); padding: 13px 16px; }
+  .banner svg { width: 19px; height: 19px; color: var(--accent-ink); flex-shrink: 0; margin-top: 1px; }
+  .banner span { font-size: 12.5px; color: var(--accent-ink); }
+  .banner b { font-weight: 750; }
+
+  .brief { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 15px 17px; box-shadow: var(--shadow); margin-top: 14px; }
+  .brief .txt { font-size: 13.5px; color: var(--ink-2); white-space: pre-wrap; margin-top: 8px; }
+
+  .refimg { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 15px 17px; box-shadow: var(--shadow); margin-top: 14px; text-align: center; }
+  .refimg img { max-width: 100%; height: auto; border-radius: 10px; }
+  .refimg .cap { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  .lock { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 15px 17px; box-shadow: var(--shadow); position: relative; overflow: hidden; margin-top: 14px; }
+  .lock::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .lock.set::before { background: var(--done); }
+  .lock .head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .lock .tag { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent-ink); background: var(--accent-soft); padding: 3px 7px; border-radius: 20px; white-space: nowrap; }
+  .lock.set .tag { color: #fff; background: var(--done); }
+  .lock .head-right { display: flex; align-items: center; gap: 8px; }
+  .lockEditBtn { font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--accent-ink);
+    background: none; border: 1px solid var(--border-strong); border-radius: 20px; padding: 3px 9px; }
+  .lockEditBtn:hover { background: var(--accent-soft); }
+  .lock .hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .lock input { margin-top: 9px; width: 100%; font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; }
+  .lock input:focus { outline: none; border-color: var(--accent); }
+  .lockValue { margin-top: 9px; width: 100%; font: inherit; font-size: 15px; font-weight: 700; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    box-sizing: border-box; }
+
+  .summary { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 14px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+  .tile .k { font-size: 26px; font-weight: 750; letter-spacing: -.02em; color: var(--ink); }
+  .tile .k small { font-size: 15px; color: var(--muted); font-weight: 600; }
+  .tile .cap { font-size: 11.5px; color: var(--ink-2); }
+  .progress { height: 8px; background: var(--surface-2); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+  .progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), #e0a24d); border-radius: 20px; }
+
+  .band { display: flex; align-items: baseline; justify-content: space-between; margin: 26px 2px 12px; }
+  .band h2 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
+  .band .meta { font-size: 12px; color: var(--muted); }
+
+  .pipe { display: flex; flex-direction: column; gap: 11px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    box-shadow: var(--shadow); transition: box-shadow .18s, border-color .18s; }
+  .card:hover { box-shadow: var(--shadow-lift); border-color: var(--border-strong); }
+  .card .row { display: grid; grid-template-columns: 34px 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; }
+  .idx { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+    background: var(--surface-2); color: var(--ink-2); font-weight: 700; font-size: 13px;
+    font-variant-numeric: tabular-nums; border: 1px solid var(--border); }
+  .card.done .idx { background: var(--done); color: #fff; border-color: transparent; }
+  .card.active .idx { background: var(--active); color: #fff; border-color: transparent; }
+  .card .title { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .card .title .nm { font-size: 15px; font-weight: 650; color: var(--ink); letter-spacing: -.01em; }
+  .card .rt { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+
+  .owner { display: flex; align-items: center; gap: 7px; }
+  .owner .nm { font-size: 12.5px; color: var(--ink-2); font-weight: 650; white-space: nowrap; }
+  .av.sm { width: 26px; height: 26px; font-size: 10.5px; border-width: 2px; }
+
+  .sel { font-family: inherit; font-size: 12px; font-weight: 650; border-radius: 20px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--ink-2);
+    padding: 6px 10px; appearance: none; -webkit-appearance: none; text-align: center;
+    transition: border-color .15s, background .15s, color .15s; }
+  .sel:hover { border-color: var(--border-strong); }
+  .sel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .owner-sel { min-width: 132px; }
+  .status-sel { min-width: 112px; }
+  .status-sel.s-todo { color: var(--todo); background: color-mix(in srgb, var(--todo) 14%, transparent); border-color: transparent; }
+  .status-sel.s-active { color: var(--active); background: color-mix(in srgb, var(--active) 14%, transparent); border-color: transparent; }
+  .status-sel.s-done { color: var(--done); background: color-mix(in srgb, var(--done) 16%, transparent); border-color: transparent; }
+
+  .savebar { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+  .savebar .dot2 { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .savebar.busy { color: var(--accent); } .savebar.busy .dot2 { background: var(--accent); }
+  .savebar.ok { color: var(--done); } .savebar.ok .dot2 { background: var(--done); }
+  .savebar.err { color: var(--over); } .savebar.err .dot2 { background: var(--over); }
+
+  .disc { background: none; border: none; cursor: pointer; color: var(--muted); width: 30px; height: 30px;
+    border-radius: 8px; display: grid; place-items: center; transition: background .15s, color .15s; flex-shrink: 0; }
+  .disc:hover { background: var(--surface-2); color: var(--ink); }
+  .disc:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .disc svg { width: 16px; height: 16px; transition: transform .22s ease; }
+  .card.open .disc svg { transform: rotate(180deg); }
+
+  .drawer { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s ease; }
+  .card.open .drawer { grid-template-rows: 1fr; }
+  .drawer > .inner { overflow: hidden; }
+  .drawer .pad { padding: 2px 16px 16px 64px; border-top: 1px solid var(--border); margin-top: 2px; }
+  .drawer .pad::before { content: ""; display: block; height: 12px; }
+
+  .notefield { margin-top: 10px; }
+  .notefield label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--muted); margin-bottom: 5px; }
+  .notefield input { width: 100%; font: inherit; font-size: 14px; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 10px; padding: 9px 11px; }
+  .notefield input:focus { outline: none; border-color: var(--accent); }
+
+  .outputfield { margin-top: 10px; }
+  .outputfield label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--muted); margin-bottom: 5px; }
+  .outputfield textarea { width: 100%; font: inherit; font-size: 13.5px; line-height: 1.5; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 10px;
+    padding: 10px 12px; min-height: 90px; resize: vertical; }
+  .outputfield textarea:focus { outline: none; border-color: var(--accent); }
+
+  .canvasrow { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .canvasbtn { font-family: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 7px; background: var(--accent); color: #fff;
+    border: none; border-radius: 9px; padding: 9px 14px; }
+  .canvasbtn.secondary { background: var(--surface-2); color: var(--ink); border: 1px solid var(--border); }
+  .canvasbtn:hover { filter: brightness(1.05); }
+  .canvasbtn svg { width: 14px; height: 14px; }
+
+  .howto { font-size: 13px; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; white-space: pre-wrap; }
+  .howto b { color: var(--ink); font-weight: 650; }
+  .howtorow { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-top: 10px; }
+  .howtorow .howto { flex: 1; margin-top: 0; }
+  .copybtn { font-family: inherit; font-size: 11.5px; font-weight: 650; cursor: pointer; background: var(--surface);
+    color: var(--ink-2); border: 1px solid var(--border-strong); border-radius: 9px; padding: 7px 11px; white-space: nowrap; }
+  .copybtn:hover { border-color: var(--accent); color: var(--accent-ink); }
+  .copybtn.done { color: var(--done); border-color: var(--done); }
+
+  .drop { margin-top: 12px; border: 1.5px dashed var(--border-strong); border-radius: 11px; padding: 14px;
+    display: flex; align-items: center; gap: 12px; justify-content: space-between; flex-wrap: wrap; background: var(--surface); }
+  .btn { font-family: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; background: var(--accent);
+    color: #fff; border: none; border-radius: 9px; padding: 8px 14px; text-decoration: none; display: inline-block; }
+  .btn.ghost { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border); }
+
+  .filelist { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 11px; }
+  .fl-h { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 7px; }
+  .fl-empty { font-size: 12.5px; color: var(--muted); font-style: italic; }
+  .fl-i { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600;
+    color: var(--accent-ink); background: var(--accent-soft); border-radius: 8px;
+    padding: 8px 10px; text-decoration: none; margin-bottom: 6px; word-break: break-all; }
+
+  .foot { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 15px 18px; box-shadow: var(--shadow); }
+  .foot .warn { display: flex; align-items: center; gap: 11px; font-size: 13px; color: var(--ink-2); }
+  .foot .warn svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
+  .foot .warn b { color: var(--ink); font-weight: 700; }
+
+  .gate { position: fixed; inset: 0; z-index: 999; background: var(--bg); display: grid; place-items: center; padding: 24px; }
+  .gate.hide { display: none; }
+  .gate .card2 { background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+    box-shadow: var(--shadow-lift); padding: 30px 28px; max-width: 380px; width: 100%; text-align: center; }
+  .gate .lock-ic { width: 46px; height: 46px; border-radius: 13px; background: var(--accent-soft);
+    color: var(--accent-ink); display: grid; place-items: center; margin: 0 auto 16px; }
+  .gate .lock-ic svg { width: 22px; height: 22px; }
+  .gate h2 { margin: 0 0 6px; font-size: 19px; font-weight: 750; letter-spacing: -.02em; color: var(--ink); }
+  .gate p { margin: 0 0 20px; font-size: 13px; color: var(--ink-2); }
+  .gate .field { display: flex; gap: 8px; }
+  .gate input { flex: 1; font-family: inherit; font-size: 15px; color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--border-strong); border-radius: 10px; padding: 11px 13px; outline: none; letter-spacing: .04em; }
+  .gate input:focus { border-color: var(--accent); }
+  .gate .go { font-family: inherit; font-size: 14px; font-weight: 650; cursor: pointer; color: #fff;
+    background: var(--accent); border: none; border-radius: 10px; padding: 0 18px; }
+  .gate .go:hover { filter: brightness(1.05); }
+  .gate .err { color: var(--over); font-size: 12.5px; margin-top: 12px; min-height: 16px; }
+  .gate.shake .card2 { animation: sh .3s; }
+  @keyframes sh { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13.5px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .gate.shake .card2 { animation: none; } }
+  @media (max-width: 780px) {
+    .summary { grid-template-columns: 1fr 1fr; }
+    .card .row { grid-template-columns: 30px 1fr; }
+    .card .rt { grid-column: 1 / -1; justify-content: flex-start; padding-left: 44px; }
+    .drawer .pad { padding-left: 20px; }
+  }
+</style>
+
+<div class="board">
+
+<div class="gate" id="gate">
+  <div class="card2">
+    <div class="lock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+    <h2>Team access</h2>
+    <p>Enter the shared team code to open this board.</p>
+    <div class="field">
+      <input id="code" type="text" placeholder="Team code" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" style="-webkit-text-security:disc" aria-label="Team code" />
+      <button class="go" id="go">Enter</button>
+    </div>
+    <div class="err" id="err"></div>
+  </div>
+</div>
+
+<div class="shell">
+
+  <header class="cmd">
+    <div class="brand">
+      <span class="brandmark"><span class="dot"></span><span class="eyebrow" id="subtitle">Loading...</span></span>
+      <h1 id="title">Team Board</h1>
+      <span class="sub">Every field on this board saves for the whole team the moment you change it.</span>
+    </div>
+    <div class="avatars" id="avatars"></div>
+    <div class="countdown" id="countdown" hidden>
+      <span class="big num" id="countdownNum">-</span>
+      <span class="lbl" id="countdownLbl">-</span>
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle light and dark theme">◐</button>
+  </header>
+
+  <div class="banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+    <span><b>This board is shared and live.</b> Every dropdown and field on it saves for the whole team the moment you change it. Reload never required, it refreshes on its own.</span>
+  </div>
+
+  <div class="brief" id="briefCard" hidden>
+    <span class="eyebrow" id="briefTitle">The assignment</span>
+    <div class="txt" id="briefText"></div>
+  </div>
+
+  <div class="refimg" id="refImgCard" hidden>
+    <img id="refImg" alt="Reference diagram" />
+    <div class="cap" id="refImgLabel"></div>
+  </div>
+
+  <div class="lock" id="lockCard" hidden>
+    <div class="head">
+      <span class="eyebrow" id="lockLabel">Team decision</span>
+      <span class="head-right">
+        <span class="tag" id="lockTag">not locked</span>
+        <button type="button" class="lockEditBtn" id="lockEditBtn" hidden>Change</button>
+      </span>
+    </div>
+    <div class="lockValue" id="lockValue" hidden></div>
+    <input id="lockInput" list="lockOptions" placeholder="Type or pick..." />
+    <datalist id="lockOptions"></datalist>
+    <div class="hint" id="lockHint"></div>
+  </div>
+
+  <section class="summary" aria-label="Progress summary">
+    <div class="tile">
+      <span class="eyebrow">Overall</span>
+      <span class="k num"><span id="overallPct">0</span><small>%</small></span>
+      <div class="progress"><span id="overallBar" style="width:0%"></span></div>
+    </div>
+    <div class="tile"><span class="k num"><span id="doneCount">0</span><small id="doneOf">/0</small></span><span class="cap">Rows done</span></div>
+    <div class="tile"><span class="k num"><span id="claimedCount">0</span><small id="claimedOf">/0</small></span><span class="cap">Rows claimed</span></div>
+  </section>
+
+  <div class="band">
+    <h2>The board, row by row</h2>
+    <span class="savebar" id="saveState"><span class="dot2"></span><span id="saveMsg">Connecting...</span></span>
+  </div>
+
+  <div class="pipe" id="pipe">
+    <div class="empty-state">Loading the board...</div>
+  </div>
+
+  <div class="unfiled" id="unfiled" hidden></div>
+
+  <div class="foot">
+    <div class="warn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <span><b>Nothing here is submitted for you.</b> This board tracks who is doing what. Carlos still reviews and posts the team's actual work himself.</span>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function () {
+  var ASSIGNMENT = 'cis622-unit7';
+  var API_URL = ""; var SNAP = {"ok": true, "config": {"title": "Unit 7 - CRM Access and Permissions", "subtitle": "Team 4 - CIS622 Data Architecture", "due": "2026-10-04T23:59:00-05:00", "roster": [{"name": "Quentin Haynes", "initials": "QH", "cls": "a1"}, {"name": "Carlos Martinez", "initials": "CM", "cls": "a4"}, {"name": "Hermela Mogos", "initials": "HM", "cls": "a2"}, {"name": "Team", "initials": "T4", "cls": "a3"}], "lock": {"label": "CRM System", "hint": "One real CRM, agreed by the whole team. Must have public documentation for its permission or role levels that you can link to.", "options": ["Salesforce", "HubSpot", "Zoho CRM", "Microsoft Dynamics 365", "Pipedrive"]}, "brief_title": "The Unit 7 Workshop, straight from Canvas", "brief_text": "You and your team work for a fictional company recovering from a ransomware attack. You just got full CRM access back and need to decide who gets access to what going forward.\\n\\n1. As a group, decide on one real CRM system your company uses.\\n2. Find that system's documentation for its permission levels.\\n3. Write your own post from the position of one specific job title in the company.\\n4. Decide the permission setting for every role on the org chart below.\\n\\nStay active in the discussion on 3 different days this week, by Saturday 11:59 PM CT. The leader compiles the final post with help from the team, it is not a solo job, and posts it to the Show and Tell thread by 8:00 PM Sunday CT.", "reference_image_url": "org-chart.png", "reference_image_label": "The Unit 7 org chart from Canvas. CEO over three Project Leads (A, B, C), each with an Engineer, a Salesperson, and a Designer. 5 distinct job titles total.", "sections": [{"name": "Permission Write-up: Quentin Haynes", "owner_fixed": "Quentin Haynes", "note_label": "Your job title (from the org chart)", "note_default": "CEO", "post1_label": "Post 1 (any day, a quick reply or reaction to get started)", "post2_label": "Post 2 (a different day, another quick reply or check-in)", "post3_label": "Post 3, your final post (this is the prompt's output)", "canvas_link_url": "https://canvas.park.edu/groups/36218/discussion_topics/1959728", "canvas_link_label": "Open Team 4 Group Thread (post here, this counts)", "canvas_link2_url": "https://canvas.park.edu/courses/90713/discussion_topics/1937194", "canvas_link2_label": "Open course-wide Workshop thread (optional)", "instr": "Quentin, you are writing as the CEO. Look up Salesforce's official permission documentation and decide what access the CEO should have, meaning what the role can view, edit, export, or administer. Name the documented permission level, write a short first-person post explaining why, and post it in the Team 4 group thread."}, {"name": "Permission Write-up: Carlos Martinez", "owner_fixed": "Carlos Martinez", "note_label": "Your job title (from the org chart)", "note_default": "Project Lead", "post1_label": "Post 1, kickoff (Day 1, due by Wed 10/1)", "post1_default": "Hey team. Given where we are on time this week, I am picking Salesforce as our CRM. It has clear public documentation on its permission levels, which is exactly what this Workshop needs.\\n\\nRoles are set. Quentin, CEO. Me, Project Lead. Hermela, Salesperson. Open your section and you will see what is needed to write your post.\\n\\nLet us each try to post on three different days this week. I will pull everything together for the Sunday summary.", "post2_label": "Post 2, quick check-in (Day 2, just confirming progress or replying to a teammate)", "post3_label": "Post 3, your final post (Day 3, this is the prompt's output)", "canvas_link_url": "https://canvas.park.edu/groups/36218/discussion_topics/1959728", "canvas_link_label": "Open Team 4 Group Thread (post here, this counts)", "canvas_link2_url": "https://canvas.park.edu/courses/90713/discussion_topics/1937194", "canvas_link2_label": "Open course-wide Workshop thread (optional)", "instr": "Carlos, you are writing as the Project Lead. Look up Salesforce's official permission documentation and decide what access the Project Lead should have, meaning what the role can view, edit, export, or administer. Name the documented permission level, write a short first-person post explaining why, and post it in the Team 4 group thread."}, {"name": "Permission Write-up: Hermela Mogos", "owner_fixed": "Hermela Mogos", "note_label": "Your job title (from the org chart)", "note_default": "Salesperson", "post1_label": "Post 1 (any day, a quick reply or reaction to get started)", "post2_label": "Post 2 (a different day, another quick reply or check-in)", "post3_label": "Post 3, your final post (this is the prompt's output)", "canvas_link_url": "https://canvas.park.edu/groups/36218/discussion_topics/1959728", "canvas_link_label": "Open Team 4 Group Thread (post here, this counts)", "canvas_link2_url": "https://canvas.park.edu/courses/90713/discussion_topics/1937194", "canvas_link2_label": "Open course-wide Workshop thread (optional)", "instr": "Hermela, you are writing as the Salesperson. Look up Salesforce's official permission documentation and decide what access the Salesperson should have, meaning what the role can view, edit, export, or administer. Name the documented permission level, write a short first-person post explaining why, and post it in the Team 4 group thread."}, {"name": "Final Show-and-Tell Summary (Leader: Carlos)", "owner_fixed": "Carlos Martinez", "output_label": "The compiled final summary (paste it here for review before posting)", "canvas_link_url": "https://canvas.park.edu/courses/90713/discussion_topics/1937179", "canvas_link_label": "Open Show-and-Tell in Canvas", "instr": "Carlos, you are compiling the final Show-and-Tell summary. Pull each role's permission level from the sections above, make sure all five job titles on the org chart are covered, and post the summary in the Unit 7 Show-and-Tell thread by 8:00 PM CT Sunday."}, {"name": "Permission Write-up: Hermela Mogos (Engineer)", "owner_fixed": "Hermela Mogos", "note_label": "Your job title (from the org chart)", "note_default": "Engineer", "post1_label": "Post 1 (any day, a quick reply or reaction to get started)", "post2_label": "Post 2 (a different day, another quick reply or check-in)", "post3_label": "Post 3, your final post (this is the prompt's output)", "canvas_link_url": "https://canvas.park.edu/groups/36218/discussion_topics/1959728", "canvas_link_label": "Open Team 4 Group Thread (post here, this counts)", "canvas_link2_url": "https://canvas.park.edu/courses/90713/discussion_topics/1937194", "canvas_link2_label": "Open course-wide Workshop thread (optional)", "instr": "Hermela, you are writing as the Engineer. Look up Salesforce's official permission documentation and decide what access the Engineer should have, meaning what the role can view, edit, export, or administer. Name the documented permission level, write a short first-person post explaining why, and post it in the Team 4 group thread."}, {"name": "Permission Write-up: Team (Designer)", "owner_fixed": "Team", "note_label": "Your job title (from the org chart)", "note_default": "Designer", "post1_label": "Post 1 (any day, a quick reply or reaction to get started)", "post2_label": "Post 2 (a different day, another quick reply or check-in)", "post3_label": "Post 3, your final post (this is the prompt's output)", "canvas_link_url": "https://canvas.park.edu/groups/36218/discussion_topics/1959728", "canvas_link_label": "Open Team 4 Group Thread (post here, this counts)", "canvas_link2_url": "https://canvas.park.edu/courses/90713/discussion_topics/1937194", "canvas_link2_label": "Open course-wide Workshop thread (optional)", "instr": "Team, we are writing as the Designer. Look up Salesforce's official permission documentation and decide what access the Designer should have, meaning what the role can view, edit, export, or administer. Name the documented permission level, write a short first-person post explaining why, and post it in the Team 4 group thread."}]}, "assignments": [{"section": "__lock__", "owner": "Salesforce", "status": "Not started", "note": "", "output": "", "post1": "", "post2": "", "post3": ""}, {"section": "Permission Write-up: Quentin Haynes", "owner": "", "status": "Done", "note": "CEO", "output": "", "post1": "**CEO**\n\nAs CEO, especially after recovering from a ransomware attack, I would want broad visibility into our Salesforce CRM without having unnecessary administrative control. I would use Salesforce\u2019s **Minimum Access \u2013 Salesforce** profile as the baseline and add only the permissions required for my responsibilities through permission sets. Salesforce recommends using permission sets and permission set groups to provide users with the access necessary for their work while following the principle of least privilege (Salesforce, n.d.-b).\n\nAs CEO, I would also be positioned high in the **role hierarchy**, allowing me to view records belonging to users below me when Salesforce\u2019s sharing settings permit that access (Salesforce, n.d.-d). I would need to view company records and reports, edit records when executive action is required, and have the **Export Reports** permission when company data needs to be analyzed or shared outside Salesforce (Salesforce, n.d.-a).\n\nHowever, I would not give the CEO **Modify All Data** or full System Administrator privileges. Salesforce identifies View All and Modify All as powerful permissions that provide access beyond normal sharing restrictions (Salesforce, n.d.-c). Following a ransomware attack, restricting those privileges would reduce unnecessary security exposure while still giving me the CRM access needed to make company-wide decisions.\n\nReferences\n\nSalesforce. (n.d.-a). Export a report. Salesforce Help.  \nhttps://help.salesforce.com/s/articleView?id=analytics.reports_export.htm&type=5\n\nSalesforce. (n.d.-b). Guidelines for creating permission sets and permission set groups. Salesforce Help.  \nhttps://help.salesforce.com/s/articleView?id=platform.perm_sets_best_practices.htm&type=5\n\nSalesforce. (n.d.-c). View all and modify all permissions overview. Salesforce Help.  \nhttps://help.salesforce.com/s/articleView?id=users_profiles_view_all_mod_all.htm&type=5\n\nSalesforce. (n.d.-d). User roles. Salesforce Help.  \nhttps://help.salesforce.com/s/articleView?id=platform.admin_roles.htm&type=5", "post2": "", "post3": ""}, {"section": "Permission Write-up: Carlos Martinez", "owner": "", "status": "Done", "note": "Project Lead", "output": "", "post1": "Hey team. Given where we are on time this week, I am picking Salesforce as our CRM. It has clear public documentation on its permission levels, which is exactly what this Workshop needs.\\n\\nRoles are set. Quentin, CEO. Me, Project Lead. Hermela, Salesperson. Open your section and you will see what is needed to write your post.\\n\\nLet us each try to post on three different days this week. I will pull everything together for the Sunday summary.", "post2": "Hey team. Here is what the Project Lead credentials would look like in Salesforce.\n\nRecommended access level for Project Lead, Standard User\n\nThe Project Lead role should be provisioned at the Standard User level, not anywhere close to administrator.\n\nSalesforce documents Standard User as a profile that \"can create and edit most major types of records, run reports, and view the org's setup\" (Salesforce, n.d.-c). That fits the job. A Project Lead needs to open an account, update an opportunity, log an activity, and pull a status report for the team. The role does not need to create users, edit roles, or change sharing settings.\n\nTwo permissions should stay off this role. The first is Modify All Data, which overrides sharing across every object in the org. Salesforce's own documentation points admins toward the narrower Modify All Records instead (Salesforce, n.d.-b). The second is Weekly Data Export, which generates a full CSV copy of the org. Salesforce notes that it \"is granted by default only to the System Administrator profile because it enables wide visibility\" (Salesforce, n.d.-a). If a Project Lead's credentials get phished, neither of those should be sitting behind them.\n\nFor the records a Project Lead actually needs to see, the right lever is the role hierarchy, not a bigger profile. Users \"have access to records owned by or shared with users in roles below them\" (Salesforce, n.d.-d), so placing the Project Lead role above the project team gives access to that team's pipeline and nothing else.\n\nSalesforce also recommends starting users at Minimum Access - Salesforce and layering on permission sets rather than cloning a broad profile (Salesforce, n.d.-e). Coming out of an incident, that is the model to follow. Least privilege by default, and every exception documented and revocable.\n\nReferences\n\nSalesforce. (n.d.-a). Export backup data from Salesforce. Salesforce Help. Retrieved September 28, 2026, from https://help.salesforce.com/s/articleView?id=xcloud.admin_exportdata.htm&language=en_US&type=5\n\nSalesforce. (n.d.-b). Object permissions. Salesforce Help. Retrieved September 28, 2026, from https://help.salesforce.com/s/articleView?id=platform.users_profiles_object_perms.htm&language=en_US&type=5\n\nSalesforce. (n.d.-c). Standard profiles. Salesforce Help. Retrieved September 28, 2026, from https://help.salesforce.com/s/articleView?id=platform.standard_profiles.htm&language=en_US&type=5\n\nSalesforce. (n.d.-d). Create a user role. Salesforce Help. Retrieved September 28, 2026, from https://help.salesforce.com/s/articleView?id=platform.admin_roles.htm&language=en_US&type=5\n\nSalesforce. (n.d.-e). User permissions. Salesforce Help. Retrieved September 28, 2026, from https://help.salesforce.com/s/articleView?id=platform.admin_userperms.htm&language=en_US&type=5", "post3": "Hey team,\n\nHere is where we stand on the Unit 7 Workshop.\n\nSubmitted so far\n- CEO write-up, Quentin (posted in the main Workshop thread on 9/29)\n- Project Lead write-up, Carlos (posted here on 9/29)\n\nStill open\n- Designer write-up, Team\n- Salesperson write-up, Hermela\n- Engineer write-up, Hermela\n\nQuentin, thank you for your CEO write-up. It is well grounded in the Salesforce documentation and gives the summary a strong starting point.\n\nHermela, your Salesperson and Engineer write-ups are next. Your two sections on the team dashboard have the instructions for each one.\n\nI am compiling everything we have now. Anything added by 12:00 PM CT on Saturday, October 3, will make it into the final summary, and I will post the Show and Tell summary Sunday evening. I am looking forward to seeing what you have.\n\nThanks,\nCarlos"}, {"section": "Permission Write-up: Hermela Mogos", "owner": "", "status": "Done", "note": "Salesperson", "output": "", "post1": "Salespeople require access to essential customer and sales records, including the ability to view and edit leads, accounts, contacts, and opportunities. To establish a solid foundation, Salesforce recommends starting with the Minimum Access Salesforce profile and then enhancing it with specific permission sets tailored to the user's tasks (Salesforce, n.d.).\n\nSalespeople do not need administrative access, nor should they have visibility into manager user security settings or all company data. Salesforce underscores that object permissions dictate whether users can view, create, edit, or delete records. This means that salespeople will have precisely the permissions they need to excel in their roles (Salesforce, n.d.).\n\nAs the company recovers from a ransomware attack, it\u2019s imperative to limit access effectively and reduce the risk of unnecessary data exposure.\u00a0\n\nReference:\n\nSalesforce. (n.d.). Guidelines for creating permission sets and permission set groups Salesforce help. https://help.salesforce.com/s/articleView?id=platform.perm_set_groups.htm&type=5\n\nSalesforce. (n.d.).Control who sees what. Salesforce help.https://help.salesforce.com/s/articleView?id=platform.perm_set_groups.htm&type=5", "post2": "Addition:\n\nAs a Salesperson, I view and edit the leads, accounts, contacts, and opportunities that I own, and I do not administer anything. I also do not need the Export Reports permission, which is what lets a user take a report out of Salesforce (Salesforce, n.d.-a). After a ransomware attack, a stolen sales login with export rights could carry the customer list out of the company. If I need a file for a customer meeting, my Project Lead can pull it.\n\nReferences\n\nSalesforce. (n.d.-a). Export a report. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=analytics.reports_export.htm&language=en_US&type=5", "post3": ""}, {"section": "Final Show-and-Tell Summary (Leader: Carlos)", "owner": "", "status": "Done", "note": "", "output": "Class,\n\nTeam 4 Show-and-Tell: Who Gets Into the CRM After a Ransomware Attack\n\nOur fictional company just got its customer relationship management (CRM) system back after a ransomware attack. A CRM is the database a company uses to track its customers, its sales deals, and every call and email tied to them. We picked Salesforce because it publishes clear documentation on its permission levels. Our rule for every seat was simple. Start with the least access Salesforce offers and add only what the job needs. A profile sets a user's starting access, and a permission set adds one specific right on top of it. Salesforce's own guidance is to grant users \"only the permissions that they require\" through permission sets (Salesforce, n.d.-d).\n\nPermission decisions at a glance\n\nRole | Starting profile | Customer records | Export | Modify All Data or System Admin\nCEO | Minimum Access + permission sets | Views company records, edits when executive action is needed | Yes, Export Reports | No\nProject Lead (A, B, C) | Standard User | Own team's pipeline, through the role hierarchy | No Weekly Data Export | No\nSalesperson | Minimum Access + a sales permission set | Views and edits own leads, accounts, contacts, opportunities | No | No\nEngineer | Minimum Access + task permission sets | None | No | No\nDesigner | Minimum Access + one permission set if needed | None | No | No\n\nCEO\n\nThe CEO starts on the Minimum Access - Salesforce profile, which \"grants the least privileges in the Salesforce platform\" (Salesforce, n.d.-e), with permission sets for what the job requires. The CEO sits at the top of the role hierarchy, so they can see records owned by the people below them (Salesforce, n.d.-a). The CEO can view company records and reports, edit records when executive action is needed, and keeps the Export Reports permission for company-wide analysis (Salesforce, n.d.-b). The CEO does not get Modify All Data or the System Administrator profile.\n\nProject Lead (A, B, and C)\n\nThe Project Lead gets the Standard User profile, which \"can create and edit most major types of records, run reports, and view the org's setup\" (Salesforce, n.d.-e). A lead has to update opportunities, log activity, and pull status reports for the team. Each lead sits above their own team in the role hierarchy, so they see that team's pipeline and nothing else. The lead does not get Modify All Data or Weekly Data Export, which Salesforce grants \"by default only to the System Administrator profile because it enables wide visibility\" (Salesforce, n.d.-c).\n\nSalesperson\n\nThe Salesperson starts on Minimum Access - Salesforce with a permission set for sales work. That lets a salesperson view and edit the leads, accounts, contacts, and opportunities they own, with no admin access. Export Reports stays off. A stolen sales login with export rights could carry the customer list out of the company. If a salesperson needs a file for a customer meeting, the Project Lead pulls it.\n\nEngineer\n\nThe Engineer starts on Minimum Access - Salesforce, with permission sets for specific technical tasks such as one object, a system permission, or a connected app. An engineer does not work customer accounts, so they do not view or edit customer records and do not get Export Reports. Modify All Data stays off, because View All and Modify All \"ignore sharing rules and settings\" (Salesforce, n.d.-f).\n\nDesigner\n\nThe Designer starts on Minimum Access - Salesforce and does not need customer records. Any extra need, like reading campaign names to match artwork to a promotion, comes through a single permission set. The Designer gets no Export Reports and no admin rights.\n\nWhat every seat has in common\n\nFour of the five roles start on Minimum Access. Only the Project Lead starts higher, because running a team's pipeline and reports is the job. Only the CEO can export. Nobody on the org chart gets Modify All Data or System Administrator, because those are the rights an attacker hopes to find behind a stolen password. After a ransomware attack, that means one stolen login exposes one person's work instead of the whole customer base.\n\nReferences\n\nSalesforce. (n.d.-a). Create a user role. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=platform.admin_roles.htm&language=en_US&type=5\n\nSalesforce. (n.d.-b). Export a report. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=analytics.reports_export.htm&language=en_US&type=5\n\nSalesforce. (n.d.-c). Export backup data from Salesforce. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=xcloud.admin_exportdata.htm&language=en_US&type=5\n\nSalesforce. (n.d.-d). Guidelines for creating permission sets and permission set groups. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=platform.perm_sets_best_practices.htm&language=en_US&type=5\n\nSalesforce. (n.d.-e). Standard profiles. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=platform.standard_profiles.htm&language=en_US&type=5\n\nSalesforce. (n.d.-f). \"View All\" and \"Modify All\" permissions overview. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=users_profiles_view_all_mod_all.htm&language=en_US&type=5\n\n-Team 4 (Quentin Haynes, Carlos Martinez, Hermela Mogos)", "post1": "", "post2": "", "post3": ""}, {"section": "Permission Write-up: Hermela Mogos (Engineer)", "owner": "", "status": "Done", "note": "Engineer", "output": "", "post1": "Engineers should utilize the Minimum Access Salesforce profile along with additional permission sets necessary for their specific technical tasks. Salesforce strongly advocates for the use of permission sets to provide users only with the permissions essential for their roles. These permission sets can encompass access to objects, system permissions, Apex classes, and connected applications (Salesforce, n.d.-a).\nIt is clear that engineers do not require the Modify All Data permission simply by virtue of their position. This permission grants the highest level of data access, enabling users to override sharing rules and object-level security. Given that the company is in the process of recovering from a ransomware attack, it is crucial to limit engineers to only the technical functions they need, rather than granting them unrestricted access to all company data.\n\nReference:\n\nSalesforce. (n.d.-a).Guidelines for creating permission sets and permission set groups Salesforce help. https://help.salesforce.com/s/articleView?id=platform.perm_sets_best_practices.htm&type=5&utm_source=\n\nSalesforce. (n.d.-a). Configure permissions and access in permission sets. Salesforce help. https://help.salesforce.com/s/articleView?id=platform.perm_sets_permissions_access.htm&type=5&utm_source=\n\nSalesforce. (n.d.) Salesforce help. Modify All Data permission in. https://help.salesforce.com/s/articleView?id=000384401&type=1", "post2": "Addition:\n\nAs an Engineer, I do not work customer accounts, so I do not need to view or edit customer records to do my job. Any technical access I need, like one object or a connected app, comes through a permission set for that task (Salesforce, n.d.-a). I do not get Export Reports (Salesforce, n.d.-b). For administration, Modify All Data stays off my login, because View All and Modify All \"ignore sharing rules and settings\" (Salesforce, n.d.-c).\n\nReferences\n\nSalesforce. (n.d.-a). Guidelines for creating permission sets and permission set groups. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=platform.perm_sets_best_practices.htm&language=en_US&type=5\n\nSalesforce. (n.d.-b). Export a report. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=analytics.reports_export.htm&language=en_US&type=5\n\nSalesforce. (n.d.-c). \"View All\" and \"Modify All\" permissions overview. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=users_profiles_view_all_mod_all.htm&language=en_US&type=5", "post3": ""}, {"section": "Permission Write-up: Team (Designer)", "owner": "Team", "status": "Done", "note": "Designer", "output": "", "post1": "As a Designer, I get the Minimum Access - Salesforce profile, which \"grants the least privileges in the Salesforce platform\" (Salesforce, n.d.-c). I build marketing pieces and layouts, so I do not need to view or edit customer records. Any extra need, like reading campaign names to match artwork to a promotion, comes through a single permission set that grants \"only the permissions that they require\" (Salesforce, n.d.-a). I get no Export Reports (Salesforce, n.d.-b) and no admin rights.\n\nReferences\n\nSalesforce. (n.d.-a). Guidelines for creating permission sets and permission set groups. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=platform.perm_sets_best_practices.htm&language=en_US&type=5\n\nSalesforce. (n.d.-b). Export a report. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=analytics.reports_export.htm&language=en_US&type=5\n\nSalesforce. (n.d.-c). Standard profiles. Salesforce Help. Retrieved October 3, 2026, from https://help.salesforce.com/s/articleView?id=platform.standard_profiles.htm&language=en_US&type=5", "post2": "", "post3": ""}], "files": {}, "unfiled": []};
+  var STATUS_CLASS = { "Not started": "s-todo", "In progress": "s-active", "Done": "s-done" };
+  var LOCK_SECTION_NAME = '__lock__';
+
+  var cfg = null;         // set once the first read lands
+  var roster = {};        // name -> {initials, cls}
+  var teamCode = null;
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ── Gate ──────────────────────────────────────────────────────────────────
+  var gate = document.getElementById('gate');
+  var codeInput = document.getElementById('code');
+  var err = document.getElementById('err');
+  var gateKey = 'boardok:' + ASSIGNMENT;
+
+  function norm(v) {
+    return String(v).replace(/[\u2010-\u2015\u2212]/g, '-').replace(/\s+/g, '').toLowerCase();
+  }
+
+  function remember() {
+    try { sessionStorage.setItem(gateKey, '1'); } catch (e) {}
+    try { localStorage.setItem(gateKey, '1'); } catch (e) {}
+  }
+
+  function unlock() {
+    if (!teamCode) {
+      err.textContent = 'Still connecting. Trying again...';
+      load(false);
+      return;
+    }
+    if (norm(codeInput.value) === norm(teamCode)) {
+      gate.classList.add('hide');
+      remember();
+      startLive();
+    } else {
+      err.textContent = 'That code did not match. Check with the team.';
+      gate.classList.add('shake');
+      setTimeout(function () { gate.classList.remove('shake'); }, 320);
+      codeInput.select();
+    }
+  }
+  try { if (sessionStorage.getItem(gateKey) === '1' || localStorage.getItem(gateKey) === '1') gate.classList.add('hide'); } catch (e) {}
+  document.getElementById('go').addEventListener('click', unlock);
+  codeInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') unlock(); });
+  codeInput.focus();
+
+  // ── Theme ─────────────────────────────────────────────────────────────────
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var root = document.documentElement;
+    var isDark = getComputedStyle(root).getPropertyValue('--bg').trim().indexOf('#0d') === 0;
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  // ── Header / roster / countdown, rendered once config is known ─────────────
+  function avatarFor(owner) {
+    if (!owner) return { cls: 'tbd', initials: '?' };
+    if (roster[owner]) return roster[owner];
+    var parts = owner.split('+').map(function (s) { return s.trim(); }).filter(Boolean);
+    if (parts.length > 1) {
+      return { cls: 'pair', initials: parts.map(function (n) { return n.charAt(0).toUpperCase(); }).join('') };
+    }
+    return { cls: 'tbd', initials: '?' };
+  }
+
+  function renderHeader() {
+    document.getElementById('title').textContent = cfg.title || ASSIGNMENT;
+    document.getElementById('subtitle').textContent = cfg.subtitle || '';
+    teamCode = cfg.team_code || '';
+
+    roster = {};
+    var avatars = document.getElementById('avatars');
+    avatars.innerHTML = '';
+    (cfg.roster || []).forEach(function (p) {
+      roster[p.name] = { cls: p.cls, initials: p.initials };
+      var span = document.createElement('span');
+      span.className = 'av ' + p.cls;
+      span.title = p.name;
+      span.textContent = p.initials;
+      avatars.appendChild(span);
+    });
+
+    if (cfg.due) {
+      var due = new Date(cfg.due).getTime();
+      var box = document.getElementById('countdown');
+      var days = Math.ceil((due - Date.now()) / 86400000);
+      if (!isNaN(days)) {
+        box.hidden = false;
+        document.getElementById('countdownNum').textContent = days >= 0 ? days : 0;
+        document.getElementById('countdownLbl').textContent =
+          days > 0 ? 'days left' : (days === 0 ? 'due today' : 'past due');
+      }
+    }
+
+    if (cfg.brief_text) {
+      document.getElementById('briefCard').hidden = false;
+      if (cfg.brief_title) document.getElementById('briefTitle').textContent = cfg.brief_title;
+      // Config stores literal \n (backslash n) instead of real line breaks, so a
+      // multi-line value survives a paste into one Sheet cell. Decode it here.
+      document.getElementById('briefText').textContent = cfg.brief_text.split('\\n').join('\n');
+    }
+
+    if (cfg.reference_image_url) {
+      document.getElementById('refImgCard').hidden = false;
+      document.getElementById('refImg').src = cfg.reference_image_url;
+      document.getElementById('refImgLabel').textContent = cfg.reference_image_label || '';
+    }
+  }
+
+  // ── Lock (one shared team decision, optional) ───────────────────────────────
+  var lockInput = document.getElementById('lockInput');
+  function renderLock() {
+    if (!cfg.lock) return;
+    var box = document.getElementById('lockCard');
+    box.hidden = false;
+    document.getElementById('lockLabel').textContent = cfg.lock.label;
+    document.getElementById('lockHint').textContent = cfg.lock.hint || '';
+    var dl = document.getElementById('lockOptions');
+    dl.innerHTML = (cfg.lock.options || []).map(function (o) {
+      return '<option value="' + esc(o) + '"></option>';
+    }).join('');
+  }
+  var lockEditBtn = document.getElementById('lockEditBtn');
+  var lockValueEl = document.getElementById('lockValue');
+  function paintLock(value) {
+    if (!cfg.lock) return;
+    var box = document.getElementById('lockCard');
+    var tag = document.getElementById('lockTag');
+    if (document.activeElement !== lockInput) lockInput.value = value || '';
+    if (value && document.activeElement !== lockInput) {
+      box.classList.add('set');
+      tag.textContent = 'Locked';
+      lockEditBtn.hidden = false;
+      lockValueEl.textContent = value;
+      lockValueEl.hidden = false;
+      lockInput.hidden = true;
+    } else if (!value) {
+      box.classList.remove('set');
+      tag.textContent = 'not locked';
+      lockEditBtn.hidden = true;
+      lockValueEl.hidden = true;
+      lockInput.hidden = false;
+    }
+  }
+  lockInput.addEventListener('change', function () {
+    save(LOCK_SECTION_NAME, { owner: lockInput.value.trim() });
+  });
+  lockEditBtn.addEventListener('click', function () {
+    lockValueEl.hidden = true;
+    lockInput.hidden = false;
+    lockInput.focus();
+    lockInput.select();
+  });
+
+  function lockValue() { return lockInput.value.trim(); }
+
+  // ── Section rows, built from config ─────────────────────────────────────────
+  function rosterOptionsHtml(current) {
+    var opts = '<option value="">TBD</option>';
+    (cfg.roster || []).forEach(function (p) {
+      opts += '<option value="' + esc(p.name) + '"' + (p.name === current ? ' selected' : '') + '>' + esc(p.name) + '</option>';
+    });
+    return opts;
+  }
+
+  function fillPrompt(tmpl, noteVal) {
+    return String(tmpl || '')
+      .split('{{lock}}').join(lockValue() || '[CRM not picked yet]')
+      .split('{{note}}').join(noteVal || '[fill in above]');
+  }
+
+  // Text fields a row can carry besides owner/status. Order here is display order.
+  // A row uses whichever ones it has a *_label for, in any combination.
+  var TEXT_FIELDS = ['output', 'post1', 'post2', 'post3'];
+
+  function textFieldBlock(field, label) {
+    if (!label) return '';
+    return '<div class="outputfield"><label>' + esc(label) + '</label>' +
+      '<textarea data-field="' + field + '" placeholder="Paste your writing here once it is ready..."></textarea></div>';
+  }
+
+  function renderSections() {
+    var pipe = document.getElementById('pipe');
+    if (!cfg.sections.length) {
+      pipe.innerHTML = '<div class="empty-state">No rows configured yet for this assignment.</div>';
+      return;
+    }
+    pipe.innerHTML = cfg.sections.map(function (s, i) {
+      var ownerBlock;
+      if (s.owner_fixed) {
+        // Fixed owner, no dropdown to drive a live avatar, so paint it once from
+        // roster right here instead of leaving it to paintRow's data-av lookup.
+        var af = roster[s.owner_fixed] || { cls: 'tbd', initials: '?' };
+        ownerBlock = '<span class="owner"><span class="av sm ' + af.cls + '">' + esc(af.initials) + '</span>' +
+          '<span class="nm">' + esc(s.owner_fixed) + '</span></span>';
+      } else {
+        ownerBlock = '<span class="owner"><span class="av sm tbd" data-av>?</span>' +
+          '<select class="sel owner-sel" data-field="owner" aria-label="Owner for ' + esc(s.name) + '">' +
+          rosterOptionsHtml('') + '</select></span>';
+      }
+
+      var noteBlock = s.note_label
+        ? '<div class="notefield"><label>' + esc(s.note_label) + '</label>' +
+          '<input type="text" data-field="note" placeholder="' + esc(s.note_label) + '..." /></div>'
+        : '';
+
+      var promptBlock = s.instr
+        ? '<div class="howtorow"><div class="howto"><b>Instructions</b><br>' + esc(s.instr) + '</div></div>'
+        : '';
+
+      var textBlocks = TEXT_FIELDS.map(function (f) { return textFieldBlock(f, s[f + '_label']); }).join('');
+
+      var canvasIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>';
+      var canvasLink1 = s.canvas_link_url
+        ? '<a class="canvasbtn" href="' + esc(s.canvas_link_url) + '" target="_blank" rel="noopener">' + canvasIcon +
+          esc(s.canvas_link_label || 'Open in Canvas') + '</a>'
+        : '';
+      var canvasLink2 = s.canvas_link2_url
+        ? '<a class="canvasbtn secondary" href="' + esc(s.canvas_link2_url) + '" target="_blank" rel="noopener">' + canvasIcon +
+          esc(s.canvas_link2_label || 'Open in Canvas') + '</a>'
+        : '';
+      var canvasBlock = (canvasLink1 || canvasLink2)
+        ? '<div class="canvasrow">' + canvasLink1 + canvasLink2 + '</div>'
+        : '';
+
+      var fileBlock = s.drive_folder_id ? '<div class="filelist"><div class="fl-h">Uploaded for this row</div><div class="fl-empty">Nothing yet.</div></div>' : '';
+
+      return '<article data-section="' + esc(s.name) + '" data-idx="' + i + '" class="card">' +
+        '<div class="row">' +
+          '<span class="idx">' + (i + 1) + '</span>' +
+          '<div class="title"><span class="nm">' + esc(s.name) + '</span></div>' +
+          '<div class="rt">' + ownerBlock +
+            '<select class="sel status-sel s-todo" data-field="status" aria-label="Status for ' + esc(s.name) + '">' +
+              '<option value="Not started">Not started</option>' +
+              '<option value="In progress">In progress</option>' +
+              '<option value="Done">Done</option>' +
+            '</select>' +
+            '<button class="disc" aria-label="Show details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="drawer"><div class="inner"><div class="pad">' +
+          noteBlock + promptBlock + textBlocks + canvasBlock + fileBlock +
+        '</div></div></div>' +
+      '</article>';
+    }).join('');
+  }
+
+  // Every text field a row might carry, besides owner/status. Matches the Apps
+  // Script's own TEXT_FIELDS list field for field, so a row's API response (which
+  // already has all of these keys) can be painted directly with no translation.
+  var ALL_TEXT_FIELDS = ['note', 'output', 'post1', 'post2', 'post3'];
+
+  // ── Paint one row from live data ────────────────────────────────────────────
+  // data is a row object: {owner, status, note, output, post1, post2, post3}
+  function paintRow(section, data) {
+    var el = document.querySelector('article[data-section="' + CSS.escape(section) + '"]');
+    if (!el) return;
+    var owner = data.owner;
+    var status = STATUS_CLASS[data.status] ? data.status : 'Not started';
+
+    var ownerSel = el.querySelector('.owner-sel');
+    var statusSel = el.querySelector('[data-field="status"]');
+    var av = el.querySelector('[data-av]');
+
+    if (ownerSel && document.activeElement !== ownerSel && ownerSel.value !== (owner || '')) ownerSel.value = owner || '';
+    if (statusSel && document.activeElement !== statusSel && statusSel.value !== status) statusSel.value = status;
+    ALL_TEXT_FIELDS.forEach(function (f) {
+      var input = el.querySelector('[data-field="' + f + '"]');
+      // A *_default value from config may use literal \n (backslash n) so it survives
+      // a paste into one Sheet cell (see the brief_text convention). Decode it here so
+      // it shows as real line breaks. A no-op for values that never had escaped breaks.
+      var val = String(data[f] || '').split('\\n').join('\n');
+      if (input && document.activeElement !== input && input.value !== val) input.value = val;
+    });
+
+    if (av) {
+      var p = avatarFor(owner);
+      av.className = 'av sm ' + p.cls;
+      av.textContent = p.initials;
+    }
+    if (statusSel) statusSel.className = 'sel status-sel ' + STATUS_CLASS[status];
+
+    el.classList.remove('done', 'active');
+    if (status === 'Done') el.classList.add('done');
+    else if (status === 'In progress') el.classList.add('active');
+
+    var promptEl = el.querySelector('[data-prompt-text]');
+    var cfgSection = cfg.sections[Number(el.getAttribute('data-idx'))];
+    if (promptEl && cfgSection) promptEl.textContent = fillPrompt(cfgSection.prompt, data.note);
+  }
+
+  function renderFiles(map) {
+    if (!map) return;
+    document.querySelectorAll('article[data-section]').forEach(function (card) {
+      var box = card.querySelector('.filelist');
+      if (!box) return;
+      var files = map[card.getAttribute('data-section')] || [];
+      if (!files.length) {
+        box.innerHTML = '<div class="fl-h">Uploaded for this row</div><div class="fl-empty">Nothing yet.</div>';
+        return;
+      }
+      box.innerHTML = '<div class="fl-h">Uploaded for this row (' + files.length + ')</div>' +
+        files.map(function (f) {
+          return '<a class="fl-i" href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.name) + '</a>';
+        }).join('');
+    });
+  }
+
+  function renderUnfiled(list) {
+    var box = document.getElementById('unfiled');
+    if (!box) return;
+    if (!list || !list.length) { box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false;
+    box.innerHTML = '<div style="padding:13px 16px;background:color-mix(in srgb, var(--over) 10%, transparent);border-radius:var(--r);font-size:12.5px;">' +
+      '<b>' + list.length + ' upload' + (list.length > 1 ? 's are' : ' is') + ' not attached to any row.</b> ' +
+      list.map(function (f) { return '<a href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.name) + '</a>'; }).join(', ') +
+      '</div>';
+  }
+
+  function recount() {
+    var cards = document.querySelectorAll('article[data-section]');
+    var done = 0, claimed = 0;
+    cards.forEach(function (c) {
+      var statusSel = c.querySelector('[data-field="status"]');
+      var ownerSel = c.querySelector('.owner-sel');
+      if (statusSel && statusSel.value === 'Done') done++;
+      var hasOwner = ownerSel ? !!ownerSel.value : true;   // owner_fixed rows count as always claimed
+      if (hasOwner) claimed++;
+    });
+    var total = cards.length || 1;
+    var pct = Math.round((done / total) * 100);
+    document.getElementById('doneCount').textContent = done;
+    document.getElementById('claimedCount').textContent = claimed;
+    document.getElementById('doneOf').textContent = '/' + cards.length;
+    document.getElementById('claimedOf').textContent = '/' + cards.length;
+    document.getElementById('overallPct').textContent = pct;
+    document.getElementById('overallBar').style.width = pct + '%';
+  }
+
+  function applyAll(list, files, unfiled) {
+    (list || []).forEach(function (a) {
+      if (a.section === LOCK_SECTION_NAME) paintLock(a.owner);
+      else paintRow(a.section, a);
+    });
+    renderFiles(files);
+    renderUnfiled(unfiled);
+    recount();
+    document.querySelectorAll('#pipe textarea, #pipe input, #lockSel, input, textarea').forEach(function (x) { x.readOnly = true; });
+    document.querySelectorAll('select').forEach(function (x) { x.disabled = true; });
+  }
+
+  // ── Live load / save ─────────────────────────────────────────────────────
+  var saveBar = document.getElementById('saveState');
+  var saveMsg = document.getElementById('saveMsg');
+  var polling = null;
+  var saving = 0;
+  var holdPollUntil = 0;
+  var built = false;
+
+  function setState(kind, msg) {
+    saveBar.className = 'savebar' + (kind ? ' ' + kind : '');
+    saveMsg.textContent = msg;
+  }
+
+  function load(quiet) {
+    if (!ASSIGNMENT) { setState('err', 'No assignment in the URL.'); return; }
+    if (saving > 0 || Date.now() < holdPollUntil) return;
+    if (!quiet) setState('busy', 'Loading...');
+    Promise.resolve(SNAP)
+      .then(function (d) {
+        if (!d.ok) throw new Error(d.error || 'Read failed');
+        if (saving > 0 || Date.now() < holdPollUntil) return;
+        cfg = d.config;
+        if (!built) {
+          renderHeader();
+          renderLock();
+          renderSections();
+          built = true;
+        }
+        applyAll(d.assignments, d.files, d.unfiled);
+        setState('ok', 'Snapshot of the Team 4 dashboard, October 3, 2026. Read only.');
+      })
+      .catch(function (e) {
+        setState('err', 'Could not load. ' + e.message);
+        if (!teamCode) err.textContent = 'Could not reach the team sheet (' + e.message + '). Check your connection and tap Enter to retry.';
+      });
+  }
+
+  /**
+   * Push ONE field back to the Sheet. patch is {owner:...} or {status:...} or {note:...},
+   * never more than one at a time, so a save can never blank a field it was not sent for.
+   */
+  function save(section, patch) { return;
+    recount();
+    if (!teamCode) { setState('err', 'Not connected yet.'); return; }
+
+    saving++;
+    holdPollUntil = Date.now() + 4000;
+    setState('busy', 'Saving...');
+
+    var url = API_URL + '?action=set' +
+      '&assignment=' + encodeURIComponent(ASSIGNMENT) +
+      '&code=' + encodeURIComponent(teamCode) +
+      '&section=' + encodeURIComponent(section);
+    if (patch.hasOwnProperty('owner'))  url += '&owner=' + encodeURIComponent(patch.owner);
+    if (patch.hasOwnProperty('status')) url += '&status=' + encodeURIComponent(patch.status);
+    if (patch.hasOwnProperty('note'))   url += '&note=' + encodeURIComponent(patch.note);
+    if (patch.hasOwnProperty('output')) url += '&output=' + encodeURIComponent(patch.output);
+    if (patch.hasOwnProperty('post1'))  url += '&post1=' + encodeURIComponent(patch.post1);
+    if (patch.hasOwnProperty('post2'))  url += '&post2=' + encodeURIComponent(patch.post2);
+    if (patch.hasOwnProperty('post3'))  url += '&post3=' + encodeURIComponent(patch.post3);
+
+    fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.ok) throw new Error(d.error || 'Write failed');
+        applyAll(d.assignments, d.files, d.unfiled);
+        setState('ok', 'Saved. The team sees this now.');
+      })
+      .catch(function (e) { setState('err', 'Did not save. ' + e.message); })
+      .then(function () { saving = Math.max(0, saving - 1); holdPollUntil = Date.now() + 2000; });
+  }
+
+  // Any dropdown/input change writes through. Scope to the ROW, not the control itself,
+  // because a bare closest('[data-section]') can match the control instead of the row
+  // that contains it, which is exactly the bug that used to silently blank names.
+  document.getElementById('pipe').addEventListener('change', function (e) {
+    var field = e.target.closest('[data-field]');
+    if (!field) return;
+    var el = field.closest('article[data-section]');
+    if (!el) return;
+    var section = el.getAttribute('data-section');
+    var key = field.getAttribute('data-field');
+    var value = field.value;
+
+    var idx = Number(el.getAttribute('data-idx'));
+    var s = cfg.sections[idx];
+    // Repaint from whatever is on screen right now (the field just edited plus
+    // everything else in the row untouched), but only SEND the field that changed.
+    var fieldVal = function (name) { var f = el.querySelector('[data-field="' + name + '"]'); return f ? f.value : ''; };
+    var data = { owner: key === 'owner' ? value : (el.querySelector('.owner-sel') ? el.querySelector('.owner-sel').value : (s.owner_fixed || '')), status: fieldVal('status') };
+    ALL_TEXT_FIELDS.forEach(function (f) { data[f] = fieldVal(f); });
+    data[key] = value;
+    paintRow(section, data);
+
+    var patch = {}; patch[key] = value;
+    save(section, patch);
+  });
+
+  document.getElementById('pipe').addEventListener('click', function (e) {
+    var copyBtn = e.target.closest('[data-copy]');
+    if (copyBtn) {
+      var text = copyBtn.parentElement.querySelector('[data-prompt-text]').textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          copyBtn.textContent = 'Copied';
+          copyBtn.classList.add('done');
+          setTimeout(function () { copyBtn.textContent = 'Copy prompt'; copyBtn.classList.remove('done'); }, 1800);
+        });
+      }
+      return;
+    }
+    var btn = e.target.closest('.disc');
+    if (!btn) return;
+    var card = btn.closest('.card');
+    var open = card.classList.toggle('open');
+    btn.setAttribute('aria-label', open ? 'Hide details' : 'Show details');
+  });
+
+  function startLive() {
+    if (polling) return;
+    load(false);
+    polling = setInterval(function () { load(true); }, 20000);
+  }
+  gate.classList.add('hide'); load(false);   // fetch quietly behind the gate so the code check has something to compare against
+})();
+</script>
+
+</body>
+</html>
